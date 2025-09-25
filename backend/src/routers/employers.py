@@ -29,8 +29,7 @@ async def list_my_employees(current_user: models.User = Depends(deps.get_current
 
 # Suspend/reactivate employee
 @router.patch("/{user_id}/suspend")
-async def suspend_employee(user_id: int, suspend: bool, current_user: models.User = Depends(deps.get_current_user),
-                           db: AsyncSession = Depends(deps.get_db)):
+async def suspend_employee(user_id: int, suspend: bool, current_user: models.User = Depends(deps.get_current_user), db: AsyncSession = Depends(deps.get_db)):
     if current_user.role != "R":
         raise HTTPException(status_code=403, detail="Only employers can suspend/reactivate")
     result = await db.execute(select(models.User).where(models.User.id == user_id))

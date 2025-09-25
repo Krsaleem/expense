@@ -1,19 +1,19 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import './App.css';
 
 import LoginPage from './pages/LoginPage';
 import TicketListPage from './pages/TicketListPage';
 import EmployeeListPage from './pages/EmployeeListPage';
 import { useState } from 'react';
+import Header from './pages/Header';
 
 function App() {
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [userRole, setUserRole] = useState<'employee' | 'employer' | null>(null);
+    const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('access_token'));
+    const [userRole, setUserRole] = useState<'E' | 'R' | null>(null);
 
     return (
         <Router>
+            {isLoggedIn && <Header setIsLoggedIn={setIsLoggedIn} userRole={userRole} />}
             <Routes>
                 <Route path="/" element={<Navigate to="/login" />} />
                 <Route
@@ -27,13 +27,11 @@ function App() {
                 />
                 <Route
                     path="/tickets"
-                    element={isLoggedIn ? <TicketListPage /> : <Navigate to="/login" />}
+                    element={isLoggedIn && userRole === 'E' ? <TicketListPage /> : <Navigate to="/login" />}
                 />
                 <Route
                     path="/employees"
-                    element={
-                        isLoggedIn && userRole === 'employer' ? <EmployeeListPage /> : <Navigate to="/login" />
-                    }
+                    element={isLoggedIn && userRole === 'R' ? <EmployeeListPage /> : <Navigate to="/login" />}
                 />
             </Routes>
         </Router>

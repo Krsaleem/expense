@@ -2,13 +2,14 @@ export interface User {
     id: number;
     email: string;
     username: string;
-    role: 'employee' | 'employer';
+    role: 'R' | 'E';
     suspended: boolean;
 }
 
 export interface Ticket {
     id: number;
     title: string;
+    description:string
     amount: number;
     date: string;
     created_by: string; // user email
