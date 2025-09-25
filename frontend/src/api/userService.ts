@@ -1,7 +1,7 @@
 import { API_URL } from '../config';
 import { getAuthHeaders } from './authService';
 import axios from 'axios'; 
-
+import type { User } from '../types';
  
 // Login with form-data
 export const loginUser = async (username: string, password: string) => {
@@ -29,16 +29,12 @@ export const registerUser = async (data: any) => {
     return res.data;
 };
 
-// Get tickets (authenticated)
-export const getTickets = async () => {
-    const res = await fetch(`${API_URL}/tickets/`, {
+export const getCurrentUser = async (): Promise<User> => {
+    const res = await fetch(`${API_URL}/users/me`, {
         headers: getAuthHeaders(),
     });
-
     if (!res.ok) {
-        const errData = await res.json();
-        throw new Error(errData.detail || 'Failed to fetch tickets');
+        throw new Error('Failed to fetch current user');
     }
-
     return res.json();
 };

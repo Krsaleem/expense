@@ -30,41 +30,43 @@ async def create_ticket(
     await db.refresh(db_ticket)
     return db_ticket
 
-
 # -----------------------------
-# Get My Tickets
+# Get My Tickets (logged-in employee only)
 # -----------------------------
 @router.get("/me", response_model=list[schemas.TicketOut])
 async def get_my_tickets(
     db: AsyncSession = Depends(deps.get_db),
     current_user: models.User = Depends(deps.get_current_user)
 ):
+ 
+
     result = await db.execute(
-        select(models.Ticket).where(models.Ticket.user_id == current_user.id)
+        select(models.Ticket)
+        .options(selectinload(models.Ticket.owner))
+        .where(models.Ticket.user_id == current_user.id)
     )
     return result.scalars().all()
 
-
 # -----------------------------
-# List tickets (all tickets for employers, own tickets for employees)
+# Get all tickets of employees of logged-in employer
 # -----------------------------
 @router.get("/", response_model=list[schemas.TicketOut])
-async def list_tickets(
-    current_user: models.User = Depends(deps.get_current_user),
-    db: AsyncSession = Depends(deps.get_db)
+async def get_employees_tickets(
+    db: AsyncSession = Depends(deps.get_db),
+    current_user: models.User = Depends(deps.get_current_user)
 ):
+    if current_user.role != "R":
+        raise HTTPException(status_code=403, detail="Only employers can view their employees' tickets")
+
+    # Select tickets where ticket.owner.employer_id == current_user.id
     result = await db.execute(
-        select(models.Ticket).options(selectinload(models.Ticket.owner))
+        select(models.Ticket)
+        .options(selectinload(models.Ticket.owner))
+        .join(models.User, models.Ticket.user_id == models.User.id)
+        .where(models.User.employer_id == current_user.id)
     )
     tickets = result.scalars().all()
-
-    # Remove tickets of suspended users
-    tickets = [t for t in tickets if not t.owner.suspended]
-
-    if current_user.role == "E":
-        return [t for t in tickets if t.user_id == current_user.id]
-
-    return tickets  # employer can see all
+    return tickets
 
 
 # -----------------------------
@@ -93,21 +95,4 @@ async def approve_ticket(
     return {"message": "Ticket updated"}
 
 
-# -----------------------------
-# List tickets of all employees of logged-in employer
-# -----------------------------
-@router.get("/my-employees", response_model=list[schemas.TicketOut])
-async def tickets_of_employees(
-    current_user: models.User = Depends(deps.get_current_user),
-    db: AsyncSession = Depends(deps.get_db)
-):
-    if current_user.role != "R":
-        raise HTTPException(status_code=403, detail="Only employers can view employees' tickets")
-
-    result = await db.execute(
-        select(models.Ticket)
-        .options(selectinload(models.Ticket.owner))
-        .join(models.User, models.Ticket.user_id == models.User.id)
-        .where(models.User.employer_id == current_user.id)
-    )
-    return result.scalars().all()
+ 

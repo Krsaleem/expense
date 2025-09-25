@@ -14,11 +14,13 @@ class UserOut(BaseModel):
     username: str
     role: str
     suspended: bool
-    class Config: orm_mode = True
+    class Config:
+        orm_mode = True
 
 class TicketCreate(BaseModel):
     description: str
     amount: float
+    link: Optional[str] = None   # <- need this field for frontend link
 
 class TicketOut(BaseModel):
     id: int
@@ -26,8 +28,10 @@ class TicketOut(BaseModel):
     amount: float
     created_at: datetime
     approved: Optional[bool]
-    owner: UserOut
-    class Config: orm_mode = True
+    owner: UserOut  # owner info
+    link: Optional[str] = None  # <- include link field
+    class Config:
+        orm_mode = True
 
 class ApproveTicketRequest(BaseModel):
     approve: bool

@@ -27,23 +27,20 @@ const Header: React.FC<HeaderProps> = ({ setIsLoggedIn, userRole, user }) => {
                 background: '#eee',
             }}
         >
-            <div>
+            {/* Left section: App name + buttons */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                 <strong>My App</strong>
+
+                {userRole === 'R' && <button onClick={() => navigate('/employees')}>Employees</button>}
+                {userRole === 'E' && <button onClick={() => navigate('/tickets')}>Tickets</button>}
             </div>
 
+            {/* Right section: User info + logout */}
             {user && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                     <span>
                         {user.username} ({user.email}) - {user.role === 'R' ? 'Employer' : 'Employee'}
                     </span>
-
-                    {userRole === 'R' && (
-                        <button onClick={() => navigate('/employees')}>Employees</button>
-                    )}
-                    {userRole === 'E' && (
-                        <button onClick={() => navigate('/tickets')}>Tickets</button>
-                    )}
-
                     <button onClick={handleLogout}>Logout</button>
                 </div>
             )}

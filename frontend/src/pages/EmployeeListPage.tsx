@@ -38,19 +38,61 @@ function EmployeeListPage() {
     if (loading) return <div>Loading employees...</div>;
     if (error) return <div style={{ color: 'red' }}>{error}</div>;
 
+    const tableHeaderStyle: React.CSSProperties = {
+        textAlign: 'left',
+        padding: '10px',
+        borderBottom: '2px solid #333',
+    };
+
+    const tableCellStyle: React.CSSProperties = {
+        padding: '10px',
+        textAlign: 'left',
+
+    };
     return (
         <div style={{ padding: 20 }}>
             <h1>My Employees</h1>
-            <ul>
-                {employees.map(emp => (
-                    <li key={emp.id}>
-                        {emp.username} ({emp.email}) - {emp.suspended ? 'Suspended' : 'Active'}{' '}
-                        <button onClick={() => toggleSuspend(emp.id)}>Toggle</button>
-                    </li>
-                ))}
-            </ul>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                    <tr>
+                        <th style={tableHeaderStyle}>Username</th>
+                        <th style={tableHeaderStyle}>Email</th>
+                        <th style={tableHeaderStyle}>Status</th>
+                        <th style={tableHeaderStyle}>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {employees.map(emp => (
+                        <tr key={emp.id} style={{ borderBottom: '1px solid #ddd' }}>
+                            <td style={tableCellStyle}>{emp.username}</td>
+                            <td style={tableCellStyle}>{emp.email}</td>
+                            <td style={tableCellStyle}>
+                                <span style={{ color: emp.suspended ? 'red' : 'green' }}>
+                                    {emp.suspended ? 'Suspended' : 'Active'}
+                                </span>
+                            </td>
+                            <td style={tableCellStyle}>
+                                <button
+                                    style={{
+                                        padding: '5px 10px',
+                                        borderRadius: 5,
+                                        border: 'none',
+                                        backgroundColor: '#007bff',
+                                        color: '#fff',
+                                        cursor: 'pointer',
+                                    }}
+                                    onClick={() => toggleSuspend(emp.id)}
+                                >
+                                    Toggle
+                                </button>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
         </div>
-    );
+    ); 
+
 }
 
 export default EmployeeListPage;

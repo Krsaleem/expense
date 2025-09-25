@@ -8,12 +8,12 @@ export interface User {
 
 export interface Ticket {
     id: number;
-    title: string;
-    description:string
+    description: string;
     amount: number;
-    date: string;
-    created_by: string; // user email
+    created_at: string;
     approved?: boolean;
+    owner: User;
+    link?: string;   
 }
 
 export interface Employee {
@@ -22,3 +22,9 @@ export interface Employee {
     username: string;
     suspended: boolean;
 }
+
+export interface TicketCreate {
+    description: string;
+    amount: number;
+    link?: string; // optional
+} 
