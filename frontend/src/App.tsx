@@ -43,7 +43,7 @@ function App() {
                 />
                 <Route
                     path="/tickets"
-                    element={isLoggedIn && userRole === 'E' ? <TicketListPage userRole={userRole} /> : <Navigate to="/login" />}
+                    element={ isLoggedIn ? ( <TicketListPage userRole={userRole!} /> ) : ( <Navigate to="/login" /> ) }
                 />
                 <Route
                     path="/employees"

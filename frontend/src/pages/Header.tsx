@@ -31,8 +31,12 @@ const Header: React.FC<HeaderProps> = ({ setIsLoggedIn, userRole, user }) => {
             <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                 <strong>My App</strong>
 
-                {userRole === 'R' && <button onClick={() => navigate('/employees')}>Employees</button>}
-                {userRole === 'E' && <button onClick={() => navigate('/tickets')}>Tickets</button>}
+                {userRole === 'R' && (
+                    <>
+                        <button onClick={() => navigate('/employees')}>Employees</button>
+                        <button onClick={() => navigate('/tickets', { state: { userRole } }) }>Tickets</button>
+                    </>
+                )}
             </div>
 
             {/* Right section: User info + logout */}
