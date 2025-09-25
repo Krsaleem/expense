@@ -10,10 +10,12 @@ class User(Base):
     email = Column(String, unique=True, index=True)
     username = Column(String)
     hashed_password = Column(String)
-    role = Column(String)  # "employee" or "employer"
+    role = Column(String(1), nullable=False, default='E') # Role: 'R' = employer/manager, 'E' = employee
     suspended = Column(Boolean, default=False)
 
     tickets = relationship("Ticket", back_populates="owner")
+    employer_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    employees = relationship("User", backref="employer", remote_side=[id])
 
 
 class Ticket(Base):

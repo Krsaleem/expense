@@ -1,15 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.future import select
+from fastapi import APIRouter, Depends, HTTPException, Form
 from sqlalchemy.ext.asyncio import AsyncSession
-from db import Base, engine  # if needed
-import models
-import schemas
-import auth
-import deps
+from sqlalchemy.future import select
+import models, schemas, auth, deps
 
 router = APIRouter(prefix="/users", tags=["users"])
-
-
 
 @router.post("/register", response_model=schemas.UserOut)
 async def register(user: schemas.UserCreate, db: AsyncSession = Depends(deps.get_db)):
@@ -27,16 +21,15 @@ async def register(user: schemas.UserCreate, db: AsyncSession = Depends(deps.get
     await db.refresh(db_user)
     return db_user
 
-
-class LoginRequest(schemas.BaseModel):
-    email: str
-    password: str
-
 @router.post("/login")
-async def login(request: LoginRequest, db: AsyncSession = Depends(deps.get_db)):
-    result = await db.execute(select(models.User).where(models.User.email == request.email))
+async def login(
+    username: str = Form(...),  # must be `username`
+    password: str = Form(...),  # must be `password`
+    db: AsyncSession = Depends(deps.get_db)
+):
+    result = await db.execute(select(models.User).where(models.User.email == username))
     user = result.scalar()
-    if not user or not auth.verify_password(request.password, user.hashed_password):
+    if not user or not auth.verify_password(password, user.hashed_password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
     if user.suspended:
         raise HTTPException(status_code=403, detail="Account suspended")

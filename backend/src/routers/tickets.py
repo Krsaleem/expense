@@ -6,7 +6,8 @@ import models, schemas, deps
 router = APIRouter(prefix="/tickets", tags=["tickets"])
 
 @router.post("/", response_model=schemas.TicketOut)
-async def create_ticket(ticket: schemas.TicketCreate, current_user: models.User = Depends(deps.get_current_user),
+async def create_ticket(ticket: schemas.TicketCreate, 
+                        current_user: models.User = Depends(deps.get_current_user),
                         db: AsyncSession = Depends(deps.get_db)):
     if current_user.role != "employee":
         raise HTTPException(status_code=403, detail="Only employees can create tickets")
@@ -19,14 +20,17 @@ async def create_ticket(ticket: schemas.TicketCreate, current_user: models.User 
 @router.get("/", response_model=list[schemas.TicketOut])
 async def list_tickets(current_user: models.User = Depends(deps.get_current_user),
                        db: AsyncSession = Depends(deps.get_db)):
-    result = await db.execute(select(models.Ticket))
+    result = await db.execute(select(models.Ticket).join(models.User))
     tickets = result.scalars().all()
+    # hide tickets of suspended users
+    tickets = [t for t in tickets if not t.owner.suspended]
     if current_user.role == "employee":
         return [t for t in tickets if t.user_id == current_user.id]
     return tickets
 
 @router.patch("/{ticket_id}/approve")
-async def approve_ticket(ticket_id: int, approve: bool, current_user: models.User = Depends(deps.get_current_user),
+async def approve_ticket(ticket_id: int, request: schemas.ApproveTicketRequest,
+                         current_user: models.User = Depends(deps.get_current_user),
                          db: AsyncSession = Depends(deps.get_db)):
     if current_user.role != "employer":
         raise HTTPException(status_code=403, detail="Only employers can approve/deny")
@@ -34,7 +38,7 @@ async def approve_ticket(ticket_id: int, approve: bool, current_user: models.Use
     ticket = result.scalar()
     if not ticket:
         raise HTTPException(status_code=404, detail="Ticket not found")
-    ticket.approved = approve
+    ticket.approved = request.approve
     db.add(ticket)
     await db.commit()
     return {"message": "Ticket updated"}

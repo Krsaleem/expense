@@ -28,3 +28,10 @@ class TicketOut(BaseModel):
     approved: Optional[bool]
     owner: UserOut
     class Config: orm_mode = True
+
+class ApproveTicketRequest(BaseModel):
+    approve: bool
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
